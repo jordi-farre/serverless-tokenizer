@@ -8,16 +8,16 @@ const encryptionContextUserName = process.env.ENCRYPTION_CONTEXT_USER_NAME;
 
 module.exports.handle = (event, context, callback) => {
   const jsonBody = JSON.parse(event.body);
-  const value = jsonBody.value;
+  const token = jsonBody.token;
 
-  getEncrypted(value)
-    .then(encrypted => {
-      decrypt(encrypted)
-        .then(decrypted => {
+  get(token)
+    .then(encryptedPan => {
+      decrypt(encryptedPan)
+        .then(pan => {
           const response = {
             statusCode: 200,
             body: JSON.stringify({
-              value: decrypted.toString("UTF-8")
+              pan: pan.toString("UTF-8")
             })
           };
           callback(null, response);  
@@ -26,11 +26,11 @@ module.exports.handle = (event, context, callback) => {
 
 };
 
-function getEncrypted(id) {
+function get(token) {
   return new Promise((resolve, reject) => {
     var getParams = {
       Bucket: pciBucket, 
-      Key: id 
+      Key: token 
     }
     s3.getObject(getParams, function(err, data) {
       if (err) reject(err);
@@ -39,10 +39,10 @@ function getEncrypted(id) {
   });
 }
 
-function decrypt(value) {
+function decrypt(encryptedPan) {
   return new Promise((resolve, reject) => {
     const decryptParams = {
-      CiphertextBlob: value,
+      CiphertextBlob: encryptedPan,
       EncryptionContext: {
         "UserName": encryptionContextUserName
       }
