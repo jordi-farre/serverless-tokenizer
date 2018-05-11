@@ -1,9 +1,7 @@
 'use strict';
 const aws = require("aws-sdk");
 const uuidv1 = require('uuid/v1');
-const kms = new aws.KMS({
-  region: 'us-east-1'
-});
+const kms = new aws.KMS();
 const s3 = new aws.S3();
 const kmsAliasArn = process.env.KMS_ALIAS_ARN;
 const pciBucket = process.env.PCI_BUCKET;

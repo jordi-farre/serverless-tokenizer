@@ -7,6 +7,10 @@ provider:
   runtime: nodejs6.10
   stage: dev
   region: eu-west-1
+  environment:
+    KMS_ALIAS_ARN: ${file(./env-variables.yml):kmsAliasArn}
+    PCI_BUCKET: ${file(./env-variables.yml):pciBucket}
+    ENCRYPTION_CONTEXT_USER_NAME: ${file(./env-variables.yml):encryptionContextUserName}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
