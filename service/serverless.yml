@@ -22,7 +22,11 @@ provider:
       Resource: "*"  
 
 functions:
-  tokenizer:
-    handler: handler.handle
+  tokenize:
+    handler: tokenizer.handle
     events:
-      - http: 'POST /'
+      - http: 'POST /tokenize'
+  destokenize:
+    handler: destokenizer.handle
+    events:
+      - http: 'POST /destokenize'
