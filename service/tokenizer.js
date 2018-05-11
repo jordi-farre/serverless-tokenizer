@@ -8,18 +8,18 @@ const encryptionContextUserName = process.env.ENCRYPTION_CONTEXT_USER_NAME;
 
 module.exports.handle = (event, context, callback) => {
   const jsonBody = JSON.parse(event.body);
-  const value = jsonBody.value;
+  const pan = jsonBody.pan;
 
   
   const uuid = uuidv1();
-  encrypt(value)
-    .then(encrypted => {
-      saveEncrypted(encrypted, uuid);
+  encrypt(pan)
+    .then(encryptedPan => {
+      save(encryptedPan, uuid);
     });
   const response = {
     statusCode: 200,
     body: JSON.stringify({
-      value: uuid
+      token: uuid
     })
   };
   callback(null, response);  
@@ -27,11 +27,11 @@ module.exports.handle = (event, context, callback) => {
 };
 
 
-function encrypt(value) {
+function encrypt(pan) {
   return new Promise((resolve, reject) => {
     const params = {
      KeyId: kmsAliasArn,
-     Plaintext: value,
+     Plaintext: pan,
      EncryptionContext: {
        "UserName": encryptionContextUserName
      }
@@ -43,12 +43,12 @@ function encrypt(value) {
   });  
 }
 
-function saveEncrypted(encrypted, id) {
+function save(encryptedPan, uuid) {
   return new Promise((resolve, reject) => {
     var params = {
-      Body: encrypted, 
+      Body: encryptedPan, 
       Bucket: pciBucket, 
-      Key: id, 
+      Key: uuid, 
       ServerSideEncryption: "AES256"
     };
     s3.putObject(params, function(err, data) {
