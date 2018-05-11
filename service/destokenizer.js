@@ -36,10 +36,9 @@ function get(token) {
       Bucket: pciBucket, 
       Key: token 
     }
-    s3.getObject(getParams, function(err, data) {
-      if (err) reject(err);
-      else resolve(data.Body);
-    });
+    s3.getObject(getParams).promise()
+      .then(data => resolve(data.Body))
+      .catch(reject);
   });
 }
 
@@ -51,9 +50,8 @@ function decrypt(encryptedPan) {
         "UserName": encryptionContextUserName
       }
     }
-    kms.decrypt(decryptParams, (err, data) => {
-     if (err) reject(err);
-     else resolve(data.Plaintext);
-    });
+    kms.decrypt(decryptParams).promise()
+      .then(data => resolve(data.Plaintext))
+      .catch(reject);
   });
 }

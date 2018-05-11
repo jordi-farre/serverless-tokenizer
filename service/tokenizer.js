@@ -8,30 +8,14 @@ const encryptionContextUserName = process.env.ENCRYPTION_CONTEXT_USER_NAME;
 
 module.exports.handle = (event, context, callback) => {
   const jsonBody = JSON.parse(event.body);
-  const pan = jsonBody.pan;
-
-  
+  const pan = jsonBody.pan;  
   const uuid = uuidv1();
-  encrypt(pan)
-    .then(encryptedPan => {
-      save(encryptedPan, uuid)
-        .then(saved => {
-          success(uuid, callback);
-        });
+  encrypt(pan).then(encryptedPan => {
+    save(encryptedPan, uuid).then(saved => {
+      success(uuid, callback);
     });
-
+  });
 };
-
-function success(uuid, callback) {
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify({
-      token: uuid
-    })
-  };
-  callback(null, response);  
-}
-
 
 function encrypt(pan) {
   return new Promise((resolve, reject) => {
@@ -42,10 +26,9 @@ function encrypt(pan) {
        "UserName": encryptionContextUserName
      }
     };
-    kms.encrypt(params, (err, data) => {
-     if (err) reject(err);
-     else resolve(data.CiphertextBlob);
-    }); 
+    kms.encrypt(params).promise()
+      .then(data => resolve(data.CiphertextBlob))
+      .catch(reject);
   });  
 }
 
@@ -57,9 +40,18 @@ function save(encryptedPan, uuid) {
       Key: uuid, 
       ServerSideEncryption: "AES256"
     };
-    s3.putObject(params, function(err, data) {
-      if (err) reject(err); 
-      else resolve(data); 
-    });
+    s3.putObject(params).promise()
+      .then(resolve)
+      .catch(reject);
   });
+}
+
+function success(uuid, callback) {
+  const response = {
+    statusCode: 200,
+    body: JSON.stringify({
+      token: uuid
+    })
+  };
+  callback(null, response);  
 }
