@@ -14,8 +14,15 @@ module.exports.handle = (event, context, callback) => {
   const uuid = uuidv1();
   encrypt(pan)
     .then(encryptedPan => {
-      save(encryptedPan, uuid);
+      save(encryptedPan, uuid)
+        .then(saved => {
+          success(uuid, callback);
+        });
     });
+
+};
+
+function success(uuid, callback) {
   const response = {
     statusCode: 200,
     body: JSON.stringify({
@@ -23,8 +30,7 @@ module.exports.handle = (event, context, callback) => {
     })
   };
   callback(null, response);  
-
-};
+}
 
 
 function encrypt(pan) {
