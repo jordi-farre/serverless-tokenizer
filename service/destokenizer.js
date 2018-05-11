@@ -14,17 +14,21 @@ module.exports.handle = (event, context, callback) => {
     .then(encryptedPan => {
       decrypt(encryptedPan)
         .then(pan => {
-          const response = {
-            statusCode: 200,
-            body: JSON.stringify({
-              pan: pan.toString("UTF-8")
-            })
-          };
-          callback(null, response);  
+          success(pan, callback);  
         });
-      });
+    });
 
 };
+
+function success(pan, callback) {
+  const response = {
+    statusCode: 200,
+    body: JSON.stringify({
+      pan: pan.toString("UTF-8")
+    })
+  };
+  callback(null, response);    
+}
 
 function get(token) {
   return new Promise((resolve, reject) => {
